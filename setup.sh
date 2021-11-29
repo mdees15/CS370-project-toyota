@@ -1,6 +1,7 @@
 #!/bin/bash
 
 sudo apt-get install sqlite3
+pip install pyserial
 sqlite3 sensor_data.db << "END_OF_SQL"
 BEGIN;
 CREATE TABLE PM25 (timestamp DATETIME, value REAL);
