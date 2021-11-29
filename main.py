@@ -17,10 +17,10 @@ def get_page():
 def get_data():
     data = {"pm25": [], "pm10": []}
     for row in db_cursor.execute("SELECT * FROM PM25 ORDER BY timestamp ASC LIMIT :limit", {"limit": num_data_limit}):
-        data["pm25"].append({"timestamp": row[0].timestamp(), "value": row[1]})
+        data["pm25"].append({"timestamp": row[0].timestamp() * 1000, "value": row[1]})
 
     for row in db_cursor.execute("SELECT * FROM PM10 ORDER BY timestamp ASC LIMIT :limit", {"limit": num_data_limit}):
-        data["pm10"].append({"timestamp": row[0].timestamp(), "value": row[1]})
+        data["pm10"].append({"timestamp": row[0].timestamp() * 1000, "value": row[1]})
 
     return json.dumps(data)
 
