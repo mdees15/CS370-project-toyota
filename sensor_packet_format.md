@@ -1,4 +1,5 @@
 [Link to specification](https://www-sd-nf.oss-cn-beijing.aliyuncs.com/%E5%AE%98%E7%BD%91%E4%B8%8B%E8%BD%BD/SDS011%20laser%20PM2.5%20sensor%20specification-V1.4.pdf)
+[Link to protocol](https://cdn.sparkfun.com/assets/parts/1/2/2/7/5/Laser_Dust_Sensor_Control_Protocol_V1.3.pdf)
 
 Each packet has 10 bytes.
 
@@ -6,7 +7,7 @@ Each packet has 10 bytes.
 | Index | Name | Content |
 | :---: | :--: | :-----: |
 | 0 | Header | AA |
-| 1 | ??? | C0 |
+| 1 | Command | C0 |
 | 2 | DATA1 | Lower byte of PM2.5 value |
 | 3 | DATA2 | Upper byte of PM2.5 value |
 | 4 | DATA3 | Lower byte of PM10 value |
