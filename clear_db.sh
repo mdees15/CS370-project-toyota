@@ -1,0 +1,8 @@
+sqlite3 sensor_data.db << "END_OF_SQL"
+BEGIN;
+
+DELETE FROM PM25;
+DELETE FROM PM10;
+
+COMMIT;
+END_OF_SQL
