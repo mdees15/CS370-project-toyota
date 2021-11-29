@@ -1,0 +1,135 @@
+<head>
+    <title>Air Quality</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.6.0"></script>
+    <meta charset="UTF-8">
+</head>
+
+<body>
+    <canvas id="pm25_history" width = "200" height = "200"></canvas>
+    <canvas id="pm10_history" width = "200" height = "200"></canvas>
+    <script>
+        const pm25_chart = new Chart(document.getElementById("pm25_history"), {
+            type: "line",
+            data: {
+                datasets: [{
+                    label: "Value",
+                    data: [],
+                    segment: {
+                        borderColor: function(context) {
+                            if(context.p0.parsed.y > 250 && context.p1.parsed.y > 250) {
+                                return "rgb(126, 0, 35)" // Hazardous
+                            } else if(context.p0.parsed.y > 150 && context.p1.parsed.y > 150) {
+                                return "rgb(153, 0, 76)" // Very unhealthy
+                            } else if(context.p0.parsed.y > 55 && context.p1.parsed.y > 55) {
+                                return "rgb(255, 0, 0)" // Unhealthy
+                            } else if(context.p0.parsed.y > 35 && context.p1.parsed.y > 35) {
+                                return "rgb(255, 126, 0)" // Unhealthy for sensitive groups
+                            } else if(context.p0.parsed.y > 12 && context.p1.parsed.y > 12) {
+                                return "rgb(255, 255, 0)" // Moderate
+                            } else {
+                                return "rgb(0, 228, 0)" // Good
+                            }
+                        }
+                    },
+                    spanGaps: true
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        type: "time",
+                        // time: {
+                        //     unit: 'minute'
+                        // },
+                        title: {
+                            display: true,
+                            text: "Date"
+                        }
+                    },
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: "PM 2.5"
+                    }
+                }
+            }
+        })
+
+        const pm10_chart = new Chart(document.getElementById("pm10_history"), {
+            type: "line",
+            data: {
+                datasets: [{
+                    label: "Value",
+                    data: [],
+                    segment: {
+                        borderColor: function(context) {
+                            if(context.p0.parsed.y > 300 && context.p1.parsed.y > 300) {
+                                return "rgb(126, 0, 35)" // Hazardous
+                            } else if(context.p0.parsed.y > 200 && context.p1.parsed.y > 200) {
+                                return "rgb(153, 0, 76)" // Very unhealthy
+                            } else if(context.p0.parsed.y > 150 && context.p1.parsed.y > 150) {
+                                return "rgb(255, 0, 0)" // Unhealthy
+                            } else if(context.p0.parsed.y > 100 && context.p1.parsed.y > 100) {
+                                return "rgb(255, 126, 0)" // Unhealthy for sensitive groups
+                            } else if(context.p0.parsed.y > 50 && context.p1.parsed.y > 50) {
+                                return "rgb(255, 255, 0)" // Moderate
+                            } else {
+                                return "rgb(0, 228, 0)" // Good
+                            }
+                        }
+                    },
+                    spanGaps: true
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        type: "time",
+                        // time: {
+                        //     unit: 'minute'
+                        // },
+                        title: {
+                            display: true,
+                            text: "Date"
+                        }
+                    },
+                    y: {
+                        beginAtZero: true
+                    }
+                },
+                plugins: {
+                    title: {
+                        display: true,
+                        text: "PM 2.5"
+                    }
+                }
+            }
+        })
+
+        const update_rate = 30.0
+
+        function update() {
+            fetch(location.protocol + "\/\/" + location.hostname + ":" + location.port + "/get_data")
+                .then(response => response.json())
+                .then(data => {
+                    pm25_chart.data.datasets[0].data = []
+                    for(let i = 0; i < data["pm25"].length; i++) {
+                        pm25_chart.data.datasets[0].data.push({x: data["pm25"][i].timestamp, y: data["pm25"][i].value})
+                    }
+
+                    pm10_chart.data.datasets[0].data = []
+                    for(let i = 0; i < data["pm10"].length; i++) {
+                        pm10_chart.data.datasets[0].data.push({x: data["pm10"][i].timestamp, y: data["pm10"][i].value})
+                    }
+                })
+
+            setTimeout(update)
+        }
+
+        update()
+    </script>
+</body>
