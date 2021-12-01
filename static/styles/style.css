@@ -1,0 +1,23 @@
+.air-quality-hazardous {
+    background-color: rgb(126, 0, 35);
+}
+
+.air-quality-very-unhealthy {
+    background-color: rgb(153, 0, 76);
+}
+
+.air-quality-unhealthy {
+    background-color: rgb(255, 0, 0);
+}
+
+.air-quality-unhealthy-sensitive {
+    background-color: rgb(255, 126, 0);
+}
+
+.air-quality-moderate {
+    background-color: rgb(255, 255, 0);
+}
+
+.air-quality-good {
+    background-color: rgb(0, 228, 0);
+}
