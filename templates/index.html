@@ -2,6 +2,7 @@
     <title>Air Quality</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@^3"></script>
     <script src="https://cdn.jsdelivr.net/npm/luxon@^2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@^1"></script>
@@ -10,7 +11,18 @@
 </head>
 
 <body>
-    <div class="container">
+    <div class="container pt-5">
+        <div class="row justify-content-center">
+            <div class="col-4" align="center">
+                <div id="current-air-quality-card" class="card air-quality-good">
+                    <div class="card-body">
+                        <p id="current-air-quality-text" class="card-text">
+                            Text
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div class="row justify-content-center">
             <div class="col" align="center">
                 <canvas id="pm25_history"></canvas>
@@ -28,6 +40,68 @@
     </div> -->
 
     <script>
+        const air_qualities_pm25 = {
+            hazardous: {
+                low: 250,
+                high: 999
+            },
+            very_unhealthy: {
+                low: 150,
+                high: 250
+            },
+            unhealthy: {
+                low: 55,
+                high: 150
+            },
+            unhealthy_sensitive: {
+                low: 35,
+                high: 55
+            },
+            moderate: {
+                low: 12,
+                high: 35
+            },
+            good: {
+                low: 0,
+                high: 12
+            }
+        }
+
+        const air_qualities_pm10 = {
+            hazardous: {
+                low: 300,
+                high: 999
+            },
+            very_unhealthy: {
+                low: 200,
+                high: 300
+            },
+            unhealthy: {
+                low: 150,
+                high: 200
+            },
+            unhealthy_sensitive: {
+                low: 100,
+                high: 150
+            },
+            moderate: {
+                low: 50,
+                high: 100
+            },
+            good: {
+                low: 0,
+                high: 50
+            }
+        }
+        
+        function checkQuality_pm25(value, quality) {
+            return value >= air_qualities_pm25[quality].low && value < air_qualities_pm25[quality].high
+        }
+
+        function checkQuality_pm10(value, quality) {
+            return value >= air_qualities_pm10[quality].low && value < air_qualities_pm10[quality].high
+        }
+
         const pm25_chart = new Chart(document.getElementById("pm25_history"), {
             type: "line",
             responsive: true,
@@ -36,17 +110,22 @@
                     data: [],
                     segment: {
                         borderColor: function(context) {
-                            if(context.p1.parsed.y > 250) {
+                            if(checkQuality_pm25(context.p1.parsed.y, "hazardous")) {
                                 return "rgb(126, 0, 35)" // Hazardous
-                            } else if(context.p1.parsed.y > 150) {
+                            }
+                            if(checkQuality_pm25(context.p1.parsed.y, "very_unhealthy")) {
                                 return "rgb(153, 0, 76)" // Very unhealthy
-                            } else if(context.p1.parsed.y > 55) {
+                            }
+                            if(checkQuality_pm25(context.p1.parsed.y, "unhealthy")) {
                                 return "rgb(255, 0, 0)" // Unhealthy
-                            } else if(context.p1.parsed.y > 35) {
+                            }
+                            if(checkQuality_pm25(context.p1.parsed.y, "unhealthy_sensitive")) {
                                 return "rgb(255, 126, 0)" // Unhealthy for sensitive groups
-                            } else if(context.p1.parsed.y > 12) {
+                            }
+                            if(checkQuality_pm25(context.p1.parsed.y, "moderate")) {
                                 return "rgb(255, 255, 0)" // Moderate
-                            } else {
+                            }
+                            if(checkQuality_pm25(context.p1.parsed.y, "good")){
                                 return "rgb(0, 228, 0)" // Good
                             }
                         }
@@ -90,17 +169,22 @@
                     data: [],
                     segment: {
                         borderColor: function(context) {
-                            if(context.p1.parsed.y > 300) {
+                            if(checkQuality_pm10(context.p1.parsed.y, "hazardous")) {
                                 return "rgb(126, 0, 35)" // Hazardous
-                            } else if(context.p1.parsed.y > 200) {
+                            }
+                            if(checkQuality_pm10(context.p1.parsed.y, "very_unhealthy")) {
                                 return "rgb(153, 0, 76)" // Very unhealthy
-                            } else if(context.p1.parsed.y > 150) {
+                            }
+                            if(checkQuality_pm10(context.p1.parsed.y, "unhealthy")) {
                                 return "rgb(255, 0, 0)" // Unhealthy
-                            } else if(context.p1.parsed.y > 100) {
+                            }
+                            if(checkQuality_pm10(context.p1.parsed.y, "unhealthy_sensitive")) {
                                 return "rgb(255, 126, 0)" // Unhealthy for sensitive groups
-                            } else if(context.p1.parsed.y > 50) {
+                            }
+                            if(checkQuality_pm10(context.p1.parsed.y, "moderate")) {
                                 return "rgb(255, 255, 0)" // Moderate
-                            } else {
+                            }
+                            if(checkQuality_pm10(context.p1.parsed.y, "good")){
                                 return "rgb(0, 228, 0)" // Good
                             }
                         }
@@ -136,7 +220,7 @@
             }
         })
 
-        const update_rate = 30.0
+        const update_rate = 5.0
 
         function update() {
             console.log("updating")
@@ -145,6 +229,37 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log(data)
+
+                    if(data["pm25"].length > 0) {
+                        let latest_data = data["pm25"][data["pm25"].length - 1].value
+                        let card = document.getElementById("current-air-quality-card")
+                        let card_text = document.getElementById("current-air-quality-text")
+
+                        if(checkQuality_pm25(latest_data, "hazardous")) {
+                            card.className = "card white-text air-quality-hazardous"
+                            card_text.innerHTML = "Hazardous"
+                        }
+                        if(checkQuality_pm25(latest_data, "very_unhealthy")) {
+                            card.className = "card white-text air-quality-very-unhealthy"
+                            card_text.innerHTML = "Very unhealthy"
+                        }
+                        if(checkQuality_pm25(latest_data, "unhealthy")) {
+                            card.className = "card white-text air-quality-unhealthy"
+                            card_text.innerHTML = "Unhealthy"
+                        }
+                        if(checkQuality_pm25(latest_data, "unhealthy_sensitive")) {
+                            card.className = "card white-text air-quality-unhealthy-sensitive"
+                            card_text.innerHTML = "Unhealthy for sensitive people"
+                        }
+                        if(checkQuality_pm25(latest_data, "moderate")) {
+                            card.className = "card white-text air-quality-moderate"
+                            card_text.innerHTML = "Moderate"
+                        }
+                        if(checkQuality_pm25(latest_data, "good")) {
+                            card.className = "card air-quality-good"
+                            card_text.innerHTML = "Good"
+                        }
+                    }
                     
                     pm25_chart.data.datasets[0].data = []
                     for(let i = 0; i < data["pm25"].length; i++) {
