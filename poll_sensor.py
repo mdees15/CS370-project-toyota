@@ -2,16 +2,17 @@ import serial
 import sqlite3
 import sys
 import time
+import random
 
 db_connection = sqlite3.connect("sensor_data.db")
 db_cursor = db_connection.cursor()
 
 sleep_time = 10
 
-port = None
+# port = None
 
 test_case = ['AA', 'C0', 'D4', '04', '3A', '0A', 'A1', '60', '1D', 'AB']
-test = False
+demo_mode = False
 
 def verify_checksum(data):
     checksum = 0
@@ -44,43 +45,64 @@ def get_data(packet):
 
     return {"pm2.5": pm25, "pm10": pm10}
 
-def get_packet():
-    data = []
-    for i in range(10):
+def get_packet(path):
+    port = serial.Serial(path)
+    data = [b'\xAA']
+    while True:
+        byte = port.read()
+
+        if byte == b'\xAA':
+            break
+
+    for i in range(9):
         byte = port.read()
         data.append(byte)
 
     return data
 
 def save_data(pm25, pm10):
-    db_cursor.execute("INSERT INTO PM25 (timestamp, value) VALUES(datetime('now'), :value)", {"value": pm25})
-    db_cursor.execute("INSERT INTO PM10 (timestamp, value) VALUES(datetime('now'), :value)", {"value": pm10})
+    print("adding data, pm25=" + str(pm25) + " pm10=" + str(pm10))
+
+    db_cursor.execute("INSERT INTO PM25 (timestamp, value) VALUES(datetime('now', 'localtime'), :value)", {"value": pm25})
+    db_cursor.execute("INSERT INTO PM10 (timestamp, value) VALUES(datetime('now', 'localtime'), :value)", {"value": pm10})
     db_connection.commit()
 
-def poll():
+def poll(path):
     while True:
-        data = get_data(get_packet())
+        if demo_mode:
+            save_data(random.random() * 200, random.random() * 200)
+        else:
+            data = get_data(get_packet(path))
 
-        if data != None:
-            save_data(data["pm2.5"], data["pm10"])
+            if data != None:
+                save_data(data["pm2.5"], data["pm10"])
 
         time.sleep(sleep_time)
 
+def do_test():
+    packet = []
+    for i in range(10):
+         packet.append(bytes.fromhex(test_case[i]))
+
+    print(get_data(packet))
+
 def main():
-    if not test:
-        if len(sys.argv) != 2:
-            print("Usage: " + sys.argv[0] + " device_path")
-            return 1
+    if len(sys.argv) < 2:
+        print("Usage: " + sys.argv[0] + " device_path")
+        return
 
-        port = serial.Serial(sys.argv[1]) # probably /dev/ttyUSB0
+    if len(sys.argv) >= 3:
+        if sys.argv[2] == "test":
+            do_test()
+            return
+        if sys.argv[2] == "demo":
+            global demo_mode
+            demo_mode = True
 
-        poll()
-    else:
-        packet = []
-        for i in range(10):
-            packet.append(bytes.fromhex(test_case[i]))
+    sensor_port_path = sys.argv[1] # probably /dev/ttyUSB0
 
-        print(get_data(packet))
+    poll(sensor_port_path)
+        
     
 
 if __name__ == '__main__':
