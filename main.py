@@ -16,11 +16,14 @@ def get_data():
     db_cursor = db_connection.cursor()
 
     data = {"pm25": [], "pm10": []}
-    for row in db_cursor.execute('SELECT timestamp AS "timestamp [timestamp]", value AS "value [real]" FROM PM25 ORDER BY timestamp ASC LIMIT :limit', {"limit": num_data_limit}):
+    for row in db_cursor.execute('SELECT timestamp AS "timestamp [timestamp]", value AS "value [real]" FROM PM25 ORDER BY timestamp DESC LIMIT :limit', {"limit": num_data_limit}):
         data["pm25"].append({"timestamp": row[0].timestamp() * 1000, "value": row[1]})
 
-    for row in db_cursor.execute('SELECT timestamp AS "timestamp [timestamp]", value AS "value [real]" FROM PM10 ORDER BY timestamp ASC LIMIT :limit', {"limit": num_data_limit}):
+    for row in db_cursor.execute('SELECT timestamp AS "timestamp [timestamp]", value AS "value [real]" FROM PM10 ORDER BY timestamp DESC LIMIT :limit', {"limit": num_data_limit}):
         data["pm10"].append({"timestamp": row[0].timestamp() * 1000, "value": row[1]})
+
+    data["pm25"].reverse()
+    data["pm10"].reverse()
 
     return json.dumps(data)
 
