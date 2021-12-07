@@ -67,10 +67,21 @@ def save_data(pm25, pm10):
     db_cursor.execute("INSERT INTO PM10 (timestamp, value) VALUES(datetime('now', 'localtime'), :value)", {"value": pm10})
     db_connection.commit()
 
+demo_pm25_last = 0
+demo_pm10_last = 0
+
 def poll(path):
     while True:
         if demo_mode:
-            save_data(random.random() * 200, random.random() * 200)
+            global demo_pm25_last, demo_pm10_last
+
+            demo_pm25 = max(0, min(300, demo_pm25_last + (random.choice([1, -1]) * random.random() * 10)))
+            demo_pm10 = max(0, min(350, demo_pm10_last + (random.choice([1, -1]) * random.random() * 10)))
+
+            demo_pm25_last = demo_pm25
+            demo_pm10_last = demo_pm10
+
+            save_data(demo_pm25, demo_pm10)
         else:
             data = get_data(get_packet(path))
 
